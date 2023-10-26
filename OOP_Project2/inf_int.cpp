@@ -1,15 +1,20 @@
 #include "inf_int.h"
+using namespace std;
 
-// 
-// to be filled by students
-//
-// example :
-//
-// bool operator==(const inf_int& a , const inf_int& b)
-// {
-//     // we assume 0 is always positive.
-//     if ( (strcmp(a.digits , b.digits)==0) && a.thesign==b.thesign )
-//         return true;
-//     return false;
-// }
-//
+inf_int::inf_int() {
+	digits = 0;
+	length = 1;
+	thesign = true;
+}
+
+inf_int::inf_int(int a) {
+	
+}
+
+inf_int::inf_int(const char* a) {
+
+}
+
+inf_int::inf_int(const inf_int& a) {
+
+}
