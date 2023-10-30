@@ -200,7 +200,7 @@ inf_int operator+(const inf_int& a, const inf_int& b){
 		return result;
 	}
 
-	else {
+	else {	// 둘 중 하나라도 음수라면
 		return a - b;
 	}
 }
@@ -219,18 +219,54 @@ inf_int operator-(const inf_int& a, const inf_int& b){
 
 	// 2번 케이스
 	if (a.thesign == true && b.thesign == false) {
-		return a + b;
+		inf_int temp = b;	// b를 양수처럼 사용하려 함
+		temp.thesign = true;	// temp = -b > 0 인 셈
+		return a + temp;	// a + temp = a + (-b) = a - b;
 	}
 	// 3번 케이스
 	else if (a.thesign == false && b.thesign == true) {
-		inf_int result =  a + b;
-		result.thesign = false;
+		inf_int temp = b;	// b를 음수처럼 사용하려 함
+		temp.thesign = false;	// temp = -b < 0 인 셈
 
-		return result;
+		return a + temp;	// a + temp = a + (-b) = a - b;
 	}
 
 	else {
+		inf_int result;
 
+		if (b > a) {	// b가 a보다 크다면, a와 b만 바꾼 후 sign = negative
+			swap(a, b);
+			result.thesign = false;
+		}
+
+		// 항상 a가 b보다 더 크다. 길이는 a >= b이다.
+
+		int index_a = a.length - 1, index_b = b.length - 1;
+		int borrow = 0;
+
+		while (index_b >= 0) {
+			int digit = a.digits[index_a] - b.digits[index_b] + borrow;
+
+			if (digit < 0) {	// 연산 결과가 0보다 작으면 borrow 필요, 연산 결과에 10 더해야 함
+				digit = digit + 10;
+				borrow = -1;
+			}
+
+			else borrow = 0;
+
+			result.digits = (char)digit + result.digits;
+			index_a--; index_b--;
+		}
+
+		while (index_a >= 0) {
+			int digit = a.digits[index_a] + borrow;
+			result.digits = (char)digit + result.digits;
+
+			borrow = 0;
+			index_a--;
+		}
+
+		return result;
 	}
 }
 
@@ -242,11 +278,19 @@ inf_int operator*(const inf_int& a, const inf_int& b){
 		multiplication 후에 sign negative
 	*/
 
+	inf_int result;
+
+	if (a.thesign == b.thesign) result.thesign = true;
+	else result.thesign = false;
 	
+	int index_a = a.length - 1, index_b = b.length - 1;
+
+
 }
 
 ostream& operator<<(ostream& o, const inf_int& value) {
-	o << value.digits << endl;
+	char sign = value.thesign ? '+' : '-';
+	o << sign <<  value.digits << endl;
 
 	return o;
 }
