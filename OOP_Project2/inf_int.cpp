@@ -1,5 +1,7 @@
 #include "inf_int.h"
+#include<iostream>
 #include<string>
+#include<utility>
 using namespace std;
 
 /* default constructor는 0으로 설정 */ 
@@ -11,15 +13,15 @@ inf_int::inf_int() {
 
 /* 사용자 지정 constructor, 매개변수로 정수가 들어왔을 때 */ 
 inf_int::inf_int(int integer) {
-	if (integer <= 0) integer = integer * -1;
+	if (integer < 0) integer = integer * -1;
 	digits = to_string(integer) + '\0';
-	length = digits.length();
+	length = digits.length() - 1;
 	thesign = (integer >= 0) ? true : false; // a가 0보다 작거나 크면 true, 작으면 false
 }
 
 /* 사용자 지정 constructor, 매개변수로 string이 들어왔을 때 */
 inf_int::inf_int(const string str) {
-	length = digits.length();
+	length = str.length();
 
 	if (str[0] == '-') {
 		digits = str.substr(1, length - 1);
@@ -32,6 +34,7 @@ inf_int::inf_int(const string str) {
 
 /* copy constructor */
 inf_int::inf_int(const inf_int& other) {
+	digits = '0' + '\0';
 	digits = other.digits;
 	length = other.length;
 	thesign = other.thesign;
@@ -42,12 +45,18 @@ inf_int::~inf_int(){}
 
 /*  연산자 overloading*/
 inf_int& inf_int::operator=(const inf_int& other) {
-	inf_int ret_value;
+	/*inf_int ret_value;
 	ret_value.digits = other.digits;
 	ret_value.length = other.length;
 	ret_value.thesign = other.thesign;
 
-	return ret_value;
+	return ret_value;*/
+	this->digits = '0' + '\0';
+	this->digits = other.digits;
+	this->length = other.length;
+	this->thesign = other.thesign;
+
+	return *this;
 }
 
 bool operator==(const inf_int& a, const inf_int& b){
@@ -63,7 +72,7 @@ bool operator!=(const inf_int& a, const inf_int& b){
 }
 
 bool operator>(const inf_int& a, const inf_int& b){
-	if (a.thesign == true && b.thesign == false) return true;	// 앵수는 음수보다 큼
+	if (a.thesign == true && b.thesign == false) return true;	// 양수는 음수보다 큼
 	else if (a.thesign == false && b.thesign == true) return false;	// 음수는 양수보다 작음
 
 	else if (a.thesign == true && b.thesign == true) {	// 둘 다 양수라면
@@ -92,21 +101,38 @@ bool operator>(const inf_int& a, const inf_int& b){
 }
 
 bool operator<(const inf_int& a, const inf_int& b){
-	//if (a.length != b.length) return a.length < b.length; // 길이가 다르다면, 길이가 더 긴 것이 더 큰 정수
+	if (a.thesign == false && b.thesign == true) return true;	// a(양수) > b(음수)
+	else if (a.thesign == true && b.thesign == false) return false;	// a(음수) < b(양수)
 
-	//else { // 길이가 같다면...
-	//	int length = b.length;
-	//	for (int i = 0; i < length; i++) {
-	//		if ((a.digits[i] - '0') == (b.digits[0] - '0')) continue; // 숫자가 같다면 다음 자리 비교
-	//		else return (b.digits[i] - '0') > (a.digits[i] - '0'); // 숫자가 다르다면 비교한 후 return
-	//	}
+	else if (a.thesign == true && b.thesign == true) {	// 둘 다 양수라면
+		if (a.length != b.length) return a.length < b.length; // 길이가 다르다면, 길이가 더 긴 것이 더 큰 정수
 
-	//	return false;
-	//}
+		else { // 길이가 같다면...
+			int length = a.length;
+			for (int i = 0; i < length; i++) {
+				if ((a.digits[i] - '0') == (b.digits[0] - '0')) continue; // 숫자가 같다면 다음 자리 비교
+				else return (b.digits[i] - '0') > (a.digits[i] - '0'); // 숫자가 다르다면 비교한 후 return
+			}
 
-	// operator > 의 반대
+			return false;
+		}
+	}
+	
+	else if (a.thesign == false && b.thesign == false) {	// 둘 다 음수라면
+		if (a.length != b.length) return a.length > b.length; // 길이가 다르다면, 길이가 더 긴 것이 더 작은 정수
 
-	return !(a > b);
+		else { // 길이가 같다면...
+			int length = b.length;
+			for (int i = 0; i < length; i++) {
+				if ((a.digits[i] - '0') == (b.digits[0] - '0')) continue; // 숫자가 같다면 다음 자리 비교
+				else return (b.digits[i] - '0') < (a.digits[i] - '0'); // 숫자가 다르다면 비교한 후 return
+			}
+
+			return false;
+		}
+	}
+
+	
 }
 
 inf_int operator+(const inf_int& a, const inf_int& b){
@@ -233,10 +259,12 @@ inf_int operator-(const inf_int& a, const inf_int& b){
 
 	else {
 		inf_int result;
+		result.digits = '\0';
 
 		if (b > a) {	// b가 a보다 크다면, a와 b만 바꾼 후 sign = negative
-			swap(a, b);
+			inf_int result = b - a;
 			result.thesign = false;
+			return result;
 		}
 
 		// 항상 a가 b보다 더 크다. 길이는 a >= b이다.
@@ -245,7 +273,8 @@ inf_int operator-(const inf_int& a, const inf_int& b){
 		int borrow = 0;
 
 		while (index_b >= 0) {
-			int digit = a.digits[index_a] - b.digits[index_b] + borrow;
+			int int_a = a.digits[index_a] - '0', int_b = b.digits[index_b] - '0';
+			int digit = int_a - int_b + borrow;
 
 			if (digit < 0) {	// 연산 결과가 0보다 작으면 borrow 필요, 연산 결과에 10 더해야 함
 				digit = digit + 10;
@@ -254,13 +283,13 @@ inf_int operator-(const inf_int& a, const inf_int& b){
 
 			else borrow = 0;
 
-			result.digits = (char)digit + result.digits;
+			result.digits = (char)(digit + '0') + result.digits;
 			index_a--; index_b--;
 		}
 
 		while (index_a >= 0) {
-			int digit = a.digits[index_a] + borrow;
-			result.digits = (char)digit + result.digits;
+			int digit = a.digits[index_a] - '0' + borrow;
+			result.digits = (char)(digit + '0') + result.digits;
 
 			borrow = 0;
 			index_a--;
@@ -276,6 +305,14 @@ inf_int operator*(const inf_int& a, const inf_int& b){
 		multiplication 후에 sign positive
 	2. 부호가 다른 경우
 		multiplication 후에 sign negative
+
+		Multiplication
+			a전체 * b의 각 자리
+				각 자리 곱셈, carry는 10으로 나눴을 때 몫, 나머지는 그대로 쓰기
+				다음 자리 곱셈하고 carry더한 후 10으로 나누기
+			자릿수에 맞게 0 붙이기
+			덧셈
+
 	*/
 
 	inf_int result;
@@ -283,14 +320,45 @@ inf_int operator*(const inf_int& a, const inf_int& b){
 	if (a.thesign == b.thesign) result.thesign = true;
 	else result.thesign = false;
 	
-	int index_a = a.length - 1, index_b = b.length - 1;
+	if (b > a) return b * a;	// 항상 a가 더 크도록.
+
+	int index_b = b.length - 1, index = 0;
 
 
+	while (index_b >= 0) {
+		int int_b = b.digits[index_b] - '0';
+		int carry = 0;
+
+		inf_int temp; temp.digits = '\0';
+		int index_a = a.length - 1;
+
+		while (index_a >= 0) {
+			int int_a = a.digits[index_a] - '0';
+			int digit = int_a * int_b + carry; carry = digit / 10; digit = digit % 10;
+
+			temp.digits = (char)(digit + '0') + temp.digits;
+			index_a--;
+		}
+
+		if (carry > 0) temp = (char)(carry + '0') + temp;
+
+		for (int i = 0; i < index; i++) {
+			temp.digits.insert(temp.digits.length() - 1, 1, '0');
+		}
+
+		temp.length = temp.digits.length() - 1;
+		result = result + temp;
+		index_b--; index++;
+	}
+
+	return result;
 }
 
 ostream& operator<<(ostream& o, const inf_int& value) {
 	char sign = value.thesign ? '+' : '-';
-	o << sign <<  value.digits << endl;
+
+	if (sign == '+') o << value.digits << endl;
+	else o << sign <<  value.digits << endl;
 
 	return o;
 }
