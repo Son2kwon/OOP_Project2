@@ -265,6 +265,68 @@ inf_int operator-(const inf_int& a, const inf_int& b){
 		}
 
 		int index_a = a.length - 1, index_b = b.length - 1;
+		int borrow = 0;	// borrow는 -1 or 0
+
+		while (index_b >= 0) {
+			int int_a = a.digits[index_a] - '0', int_b = b.digits[index_b] - '0';	// 각 자릿수 integer 형태로 만듦
+			int digit = int_a - int_b + borrow;	// 뺄셈 후 borrow 까지 연선
+
+			if (digit < 0) {	// 연산 결과가 0보다 작으면 borrow 필요, 연산 결과에 10 더해야 함
+				digit = digit + 10;
+				borrow = -1;
+			}
+
+			else borrow = 0;	// 연산 결과가 0보다 크면 borrow 필요 없음
+
+			result.digits = (char)(digit + '0') + result.digits;	// result에 update
+			index_a--; index_b--;	// 다음 자릿수 보기
+		}
+
+		while (index_a >= 0) {	// 항상 a > b 이므로 b가 더 먼저 끝나거나 같이 끝남
+			int digit = a.digits[index_a] - '0' + borrow;
+			
+			if (digit < 0) {	// 마찬가지로 계산
+				digit += 10;
+				borrow = -1;
+			}
+
+			else borrow = 0;
+
+			result.digits = (char)(digit + '0') + result.digits;
+
+			index_a--;	// 다음 자릿수
+		}
+
+		while (result.digits[0] == '0') {	// 혹시 불필요한 0이 나오면 0을 제거해주기 위함
+			if (result.digits[0] = '0') {
+				result.digits = result.digits.substr(1, result.digits.length() - 1);	// 0번재 index에 있는 0 빼고 나머지 string만 저장
+			}
+		}
+
+		if (result.digits[0] == '\0') result.digits = '0' + '\0';	// 만약 연산 결과가 0이라 digits에 null 문자만 남았을 경우, 0을 저장
+
+		result.length = result.digits.length() - 1;	// length 설정
+		return result;
+	}
+
+	else if (a.thesign == false && b.thesign == false) {
+		inf_int result;	// 결과를 저장할 object
+		result.digits = '\0';	// 미리 null 문자를 넣어줌
+
+		if (a > b) {	// 음수에서 a가 더 크다는 건, 절댓값이 더 크다는 것
+						//  그 결과는 양수
+			inf_int temp_a = a, temp_b = b;	// a와 b를 양수로 취급하기 위한 변수 temp_a, temp_b
+			temp_a.thesign = true; temp_b.thesign = true;
+
+			result = temp_b - temp_a;
+			result.thesign = true;
+			return result;
+		}
+
+		// b가 더 크다는 것은 절댓값이 더 작다는 것
+		// ex) -123, -45 뺄셈 연산 -> -123 + 45 -> -(123 - 45)
+
+		int index_a = a.length - 1, index_b = b.length - 1;
 		int borrow = 0;
 
 		while (index_b >= 0) {
@@ -295,16 +357,12 @@ inf_int operator-(const inf_int& a, const inf_int& b){
 				result.digits = result.digits.substr(1, result.digits.length() - 1);
 			}
 		}
+		result.thesign = false;
 
 		if (result.digits[0] == '\0') result.digits = '0' + '\0';
 
 		result.length = result.digits.length() - 1;
 		return result;
-	}
-
-	// 4번 케이스
-	else if (a.thesign == false && b.thesign == false) {
-
 	}
 }
 
