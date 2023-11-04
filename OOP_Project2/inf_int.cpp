@@ -5,6 +5,7 @@
 #include<sstream>
 using namespace std;
 
+// calculator for the problem 2
 void calculator() {
 	string input;
 	string a, b;
