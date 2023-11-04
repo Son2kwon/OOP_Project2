@@ -2,7 +2,39 @@
 #include<iostream>
 #include<string>
 #include<utility>
+#include<sstream>
 using namespace std;
+
+void calculator() {
+	string input;
+	string a, b;
+	char op;
+
+	while (true) {
+		cout << "Input: ";
+		getline(cin, input);
+		stringstream s(input);
+
+		if (input[0] == '0') break;
+
+		s >> a >> op >> b;
+
+		inf_int input_a(a);
+		inf_int input_b(b);
+
+		if (op == '+') {
+			cout << "Output: " <<  input_a + input_b << endl;
+		}
+
+		else if(op == '-') {
+			cout << "Output: " << input_a - input_b << endl;
+		}
+
+		else if (op == '*') {
+			cout << "Output: " << input_a * input_b << endl;
+		}
+	}
+}
 
 /* default constructor는 0으로 설정 */ 
 inf_int::inf_int() {

@@ -37,4 +37,6 @@ public:
     // friend istream& operator>>(istream& , inf_int&);    // not required
 };
 
+void calculator();
+
 #endif
